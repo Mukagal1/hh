@@ -1,0 +1,126 @@
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Packages #
+############
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases #
+######################
+*.log
+*.sql
+*.sqlite
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDEs and editors #
+####################
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Python #
+##########
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Node.js #
+###########
+node_modules/
+npm-debug.log
+yarn-error.log
+
+/venv
+/.env
+
+# Java #
+########
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+*.ipr
+*.iws
+target/
+build/
+
+# C/C++ #
+#########
+*.out
+*.obj
+*.elf
+*.map
+*.hex
+*.bin
+
+# Go #
+######
+*.exe
+*.test
+*.out
+
+# Rust #
+########
+target/
+Cargo.lock
+
+# Ruby #
+########
+*.gem
+*.rbc
+.bundle/
+.config/
+coverage/
+InstalledFiles
+.mochi/
+.rvm/
+.yardoc/
+_byebug_history
+
+# PHP #
+#######
+vendor/
+
+# Laravel #
+###########
+/node_modules
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+/.idea
+/.vscode
+.env
+.env.backup
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
