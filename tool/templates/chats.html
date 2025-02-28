@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}Чаты{% endblock %}
+
+{% block content %}
+    <div class="chat-container">
+        <h1>Чаты</h1>
+
+        <input type="text" id="searchInput" placeholder="Поиск чатов или пользователей..." onkeyup="searchChats()">
+
+        <ul class="chat-list" id="chatList">
+            {% for chat in chats %}
+                {% for participant in chat.participants.all %}
+                    {% if participant != user.userprofile %}
+                        <li class="chat-item" data-username="{{ participant.user.username }}" data-userid="{{ participant.id }}">
+                            <a href="{% url 'chat_detail' chat_id=chat.id %}">
+                                {{ participant.user.username }}
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            {% empty %}
+                <p class="no-chats">Нет чатов</p>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8f9fa;
+            color: #2c3e50;
+            margin: 0;
+            padding: 0;
+        }
+
+        .chat-container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #2980b9;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #ecf0f1;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .chat-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .chat-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: #3498db;
+            border-radius: 8px;
+            transition: 0.3s;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .chat-item:hover {
+            background: #2980b9;
+        }
+
+        .chat-item a {
+            text-decoration: none;
+            color: #ffffff;
+            font-weight: bold;
+            display: block;
+            font-size: 18px;
+        }
+
+        .no-chats {
+            font-size: 16px;
+            color: #7f8c8d;
+            text-align: center;
+        }
+    </style>
+
+    <script>
+        async function searchChats() {
+            let input = document.getElementById('searchInput').value.toLowerCase();
+            let chatItems = document.querySelectorAll('.chat-item');
+
+            // Фильтрация существующих чатов
+            chatItems.forEach(item => {
+                let username = item.getAttribute('data-username').toLowerCase();
+                item.style.display = username.includes(input) ? "" : "none";
+            });
+
+            // Если введённый текст не совпадает с существующими чатами, отправляем запрос на сервер
+            if (input.length > 0) {
+                let response = await fetch(`/search_user/?q=${input}`);
+                let data = await response.json();
+
+                if (data.user_id) {
+                    let userId = data.user_id;
+                    let username = data.username;
+
+                    // Если пользователь найден, но чата нет, создаем новый
+                    let newChat = document.createElement("li");
+                    newChat.classList.add("chat-item");
+                    newChat.innerHTML = `<a href="/start_chat/${userId}/">${username}</a>`;
+                    document.getElementById("chatList").appendChild(newChat);
+                }
+            }
+        }
+    </script>
+
+{% endblock %}

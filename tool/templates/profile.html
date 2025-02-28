@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+    <div class="profile-container">
+        <h1>Профиль: <span>{{ user.username }}</span></h1>
+        
+        <div class="profile-info">
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Дата регистрации:</strong> {{ user.date_joined|date:"d M Y" }}</p>
+            <p><strong>Роль:</strong> <span class="role">{{ user.userprofile.role }}</span></p>
+        </div>
+
+        <h2>Скиллы</h2>
+        <div class="skills-container">
+            {% for skill in user.userprofile.skills.all %}
+                <span class="skill">{{ skill.name }}</span>
+            {% empty %}
+                <p class="no-skills">Нет добавленных скиллов</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8f9fa;
+            color: #2c3e50;
+            margin: 0;
+            padding: 0;
+        }
+
+        .profile-container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        h1 span {
+            color: #2980b9;
+        }
+
+        .profile-info p {
+            font-size: 18px;
+            line-height: 1.6;
+            margin: 10px 0;
+            background: #ecf0f1;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .profile-info strong {
+            color: #2c3e50;
+        }
+
+        .role {
+            font-weight: bold;
+            color: #d35400;
+        }
+
+        h2 {
+            font-size: 28px;
+            margin-top: 30px;
+        }
+
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .skill {
+            background: #3498db;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 16px;
+        }
+
+        .no-skills {
+            font-size: 16px;
+            color: #7f8c8d;
+        }
+    </style>
+{% endblock %}

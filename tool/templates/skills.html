@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}Скиллы{% endblock %}
+
+{% block content %}
+    <div class="skills-container">
+        <h1>📚 Скиллы</h1>
+        <p>Здесь отображаются навыки. Найдите подходящий вам навык и добавьте себе в профиль!</p>
+
+        <!-- Поисковик -->
+        <input type="text" id="search-skill" class="search-bar" placeholder="🔍 Найти скилл...">
+
+        <!-- Список скиллов -->
+        <form id="skills-form" method="POST">
+            {% csrf_token %}
+            <div class="skills-list" id="skills-list">
+                {% for skill in skills %}
+                    <div class="skill-item" data-skill-id="{{ skill.id }}">{{ skill.name }}</div>
+                {% empty %}
+                    <p class="no-skills">Пока нет добавленных скиллов.</p>
+                {% endfor %}
+            </div>
+
+            <!-- Кнопка "Добавить скилл" -->
+            <button type="submit" class="add-skill-btn">➕ Добавить выбранные скиллы</button>
+        </form>
+    </div>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8f9fa;
+            color: #2c3e50;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .skills-container {
+            max-width: 800px; /* Ограничиваем ширину */
+            margin: 40px auto; /* Центрирование */
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        p {
+            font-size: 18px;
+            color: #7f8c8d;
+        }
+        
+        .search-bar {
+            width: 100%; /* Полная ширина внутри контейнера */
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+            display: block;
+            margin: 20px 0;
+            background: white;
+        }
+        
+        .skills-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* 3-4 элемента в ряд */
+            gap: 15px;
+            margin-top: 10px;
+            max-width: 100%;
+            padding: 10px;
+        }
+        
+        .skill-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            max-width: 100%; /* Ограничиваем по контейнеру */
+            word-wrap: break-word;
+        }
+        
+        .skill-item:hover, .skill-item.selected {
+            background: #2980b9;
+            color: white;
+            border-color: #2980b9;
+            transform: scale(1.05);
+        }
+        
+        .add-skill-btn {
+            margin-top: 20px;
+            padding: 14px 22px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background: #2ecc71;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: block;
+            width: 100%; /* Кнопка по ширине контейнера */
+        }
+        
+        .add-skill-btn:hover {
+            background: #27ae60;
+        }
+        
+        /* Медиа-запрос для мобильных экранов */
+        @media (max-width: 1024px) {
+            .skills-container {
+                margin-left: 0;
+                max-width: 100%;
+                padding: 15px;
+            }
+        
+            .skills-list {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Меняем размер на маленьких экранах */
+            }
+        }
+        
+    </style>
+    
+
+    <script>
+        let selectedSkills = new Set();
+        let skillsList = document.getElementById('skills-list');
+        let searchInput = document.getElementById('search-skill');
+
+        // Фильтрация скиллов
+        searchInput.addEventListener('input', function () {
+            let filter = this.value.toLowerCase();
+            document.querySelectorAll('.skill-item').forEach(skill => {
+                skill.style.display = skill.textContent.toLowerCase().includes(filter) ? 'inline-block' : 'none';
+            });
+        });
+
+        // Выбор скиллов
+        document.querySelectorAll('.skill-item').forEach(skill => {
+            skill.addEventListener('click', function () {
+                let skillId = this.dataset.skillId;
+                if (selectedSkills.has(skillId)) {
+                    selectedSkills.delete(skillId);
+                    this.classList.remove('selected');
+                } else {
+                    selectedSkills.add(skillId);
+                    this.classList.add('selected');
+                }
+                searchInput.value = ""; // Очистка поиска
+                reorderSkills();
+            });
+        });
+
+        // Перемещение выбранных элементов наверх
+        function reorderSkills() {
+            let selected = [];
+            let unselected = [];
+            document.querySelectorAll('.skill-item').forEach(skill => {
+                if (selectedSkills.has(skill.dataset.skillId)) {
+                    selected.push(skill);
+                } else {
+                    unselected.push(skill);
+                }
+            });
+            skillsList.innerHTML = "";
+            selected.forEach(skill => skillsList.appendChild(skill));
+            unselected.forEach(skill => skillsList.appendChild(skill));
+        }
+
+        // Отправка формы
+        document.getElementById('skills-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            let formData = new FormData();
+            selectedSkills.forEach(id => formData.append('skills[]', id));
+
+            fetch('', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            }).then(response => response.json()).then(data => {
+                if (data.message) {
+                    alert(data.message);
+                    location.reload();
+                }
+            });
+        });
+    </script>
+{% endblock %}
