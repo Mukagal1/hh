@@ -3,126 +3,155 @@
 {% block title %}Чаты{% endblock %}
 
 {% block content %}
-    <div class="chat-container">
-        <h1>Чаты</h1>
+    <div class="chat-page">
+        <div class="chat-header">
+            <h1>Чаты</h1>
+            <input type="text" id="searchInput" placeholder="🔍 Поиск чата или пользователя" onkeyup="searchChats()">
+        </div>
 
-        <input type="text" id="searchInput" placeholder="Поиск чатов или пользователей..." onkeyup="searchChats()">
+        <div class="content-wrapper">
+<div class="chats-container">
+    <h2>Ваши чаты</h2>
+    <ul class="chat-list" id="chatList">
+        {% for chat in chats %}
+            {% if chat.sender == user.userprofile %}
+                <li class="chat-item" data-username="{{ chat.receiver.user.username }}">
+                    <a href="{% url 'chat_detail' chat_id=chat.id %}">
+                        {{ chat.receiver.user.username }}
+                    </a>
+                </li>
+            {% elif chat.receiver == user.userprofile %}
+                <li class="chat-item" data-username="{{ chat.sender.user.username }}">
+                    <a href="{% url 'chat_detail' chat_id=chat.id %}">
+                        {{ chat.sender.user.username }}
+                    </a>
+                </li>
+            {% endif %}
+        {% empty %}
+            <p class="no-chats">Нет активных чатов</p>
+        {% endfor %}
+    </ul>
+</div>
 
-        <ul class="chat-list" id="chatList">
-            {% for chat in chats %}
-                {% for participant in chat.participants.all %}
-                    {% if participant != user.userprofile %}
-                        <li class="chat-item" data-username="{{ participant.user.username }}" data-userid="{{ participant.id }}">
-                            <a href="{% url 'chat_detail' chat_id=chat.id %}">
-                                {{ participant.user.username }}
-                            </a>
-                        </li>
-                    {% endif %}
-                {% endfor %}
-            {% empty %}
-                <p class="no-chats">Нет чатов</p>
-            {% endfor %}
-        </ul>
+<!-- Секция пользователей -->
+<div class="users-container">
+    <h2>Пользователи</h2>
+    <ul class="user-list" id="userList">
+        {% for user_obj in users %}
+            <li class="user-item" data-username="{{ user_obj.username }}">
+                <a href="{% url 'chat_with_user' user_id=user_obj.id %}">
+                    {{ user_obj.username }}
+                </a>
+            </li>              
+        {% endfor %}
+    </ul>
+</div>
+
+        </div>
     </div>
 
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background: #f8f9fa;
-            color: #2c3e50;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
             margin: 0;
             padding: 0;
         }
 
-        .chat-container {
-            max-width: 900px;
-            margin: 50px auto;
+        .chat-page {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
             padding: 20px;
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        h1 {
-            font-size: 36px;
-            font-weight: 700;
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
-            text-align: center;
-            color: #2980b9;
         }
 
-        input {
+        .chat-header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        #searchInput {
+            padding: 8px;
             width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
+            max-width: 250px;
             border: 1px solid #ddd;
-            border-radius: 8px;
-            background: #ecf0f1;
-            color: #2c3e50;
-            font-size: 16px;
+            border-radius: 5px;
+            outline: none;
         }
 
-        .chat-list {
+        .content-wrapper {
+            display: flex;
+            gap: 20px;
+        }
+
+        .chats-container, .users-container {
+            flex: 1;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            font-size: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        ul {
             list-style: none;
             padding: 0;
+            margin: 0;
         }
 
-        .chat-item {
-            padding: 15px;
-            margin: 10px 0;
-            background: #3498db;
-            border-radius: 8px;
-            transition: 0.3s;
-            text-align: center;
-            cursor: pointer;
+        .chat-item, .user-item {
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
         }
 
-        .chat-item:hover {
-            background: #2980b9;
-        }
-
-        .chat-item a {
+        .chat-item a, .user-item a {
             text-decoration: none;
-            color: #ffffff;
+            color: #007bff;
             font-weight: bold;
-            display: block;
-            font-size: 18px;
+        }
+
+        .chat-item a:hover, .user-item a:hover {
+            text-decoration: underline;
         }
 
         .no-chats {
-            font-size: 16px;
-            color: #7f8c8d;
             text-align: center;
+            color: #888;
+            font-size: 14px;
         }
     </style>
 
     <script>
-        async function searchChats() {
+        function searchChats() {
             let input = document.getElementById('searchInput').value.toLowerCase();
             let chatItems = document.querySelectorAll('.chat-item');
+            let userItems = document.querySelectorAll('.user-item');
 
-            // Фильтрация существующих чатов
             chatItems.forEach(item => {
                 let username = item.getAttribute('data-username').toLowerCase();
                 item.style.display = username.includes(input) ? "" : "none";
             });
 
-            // Если введённый текст не совпадает с существующими чатами, отправляем запрос на сервер
-            if (input.length > 0) {
-                let response = await fetch(`/search_user/?q=${input}`);
-                let data = await response.json();
-
-                if (data.user_id) {
-                    let userId = data.user_id;
-                    let username = data.username;
-
-                    // Если пользователь найден, но чата нет, создаем новый
-                    let newChat = document.createElement("li");
-                    newChat.classList.add("chat-item");
-                    newChat.innerHTML = `<a href="/start_chat/${userId}/">${username}</a>`;
-                    document.getElementById("chatList").appendChild(newChat);
-                }
-            }
+            userItems.forEach(item => {
+                let username = item.getAttribute('data-username').toLowerCase();
+                item.style.display = username.includes(input) ? "" : "none";
+            });
         }
     </script>
 

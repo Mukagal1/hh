@@ -8,6 +8,10 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from .models import Skill, UserProfile, Test, Chat, Message
+from django.db.models import Q
+
+def index(request):
+    return redirect('login_view')
 
 @csrf_exempt
 def login_view(request):
@@ -30,9 +34,12 @@ def signup(request):
         data = json.loads(request.body)
         username = data.get('username')
         password = data.get('password')
+        role = data.get('role')
         if User.objects.filter(username=username).exists():
             return JsonResponse({'status': 'error', 'message': 'User already exists'}, status=400)
         user = User.objects.create_user(username=username, password=password)
+        user.userprofile.role = role
+        user.save()
         login(request, user)
         return JsonResponse({'status': 'ok'})
     return render(request, 'signup.html')
@@ -60,10 +67,12 @@ def skills(request):
 
         return JsonResponse({"message": "Скиллы успешно добавлены!", "selected": list(skill_ids)})
 
-    skills = Skill.objects.all()
-    user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    userskills = request.user.userprofile.skills.all()
+    otherskills = Skill.objects.exclude(id__in=userskills)
+    userrole = request.user.userprofile.role
+    print(userrole)
 
-    return render(request, 'skills.html', {'skills': skills})
+    return render(request, 'skills.html', {'otherskills': otherskills, 'userskills': userskills, 'userrole': userrole})
 
 @login_required
 def tests(request):
@@ -73,57 +82,42 @@ def tests(request):
 @login_required
 def chats(request):
     user_profile = request.user.userprofile
-    chats = Chat.objects.filter(participants=user_profile)
-    users = UserProfile.objects.exclude(id=user_profile.id)  # Все пользователи, кроме текущего
+    chats= Chat.objects.filter(sender=user_profile) | Chat.objects.filter(receiver=user_profile)
+    users = User.objects.exclude(id=request.user.id)
 
-    return render(request, 'chats.html', {'chats': chats, 'users': users})
-
-@login_required
-def start_chat(request, user_id):
-    user_profile = request.user.userprofile
-    other_user = get_object_or_404(UserProfile, id=user_id)
-
-    # Проверяем, есть ли уже чат
-    chat = Chat.objects.filter(participants=user_profile).filter(participants=other_user).first()
-
-    if chat:
-        return redirect('chat_detail', chat.id)  # Если чат есть, открываем его
-
-    # Создаем новый чат
-    chat = Chat.objects.create()
-    chat.participants.add(user_profile, other_user)
-    return redirect('chat_detail', chat.id)
-
+    return render(request, 'chats.html', {'chats': chats, 'users': users, 'user': request.user})
 
 @login_required
 def chat_detail(request, chat_id):
     chat = get_object_or_404(Chat, id=chat_id)
-    messages = chat.message_set.all().order_by("created_at")  
-
-    # Определяем собеседника
-    companion = chat.participants.exclude(id=request.user.id).first()
-    companion_username = companion.user.username if companion else "Неизвестный"
 
     if request.method == "POST":
-        text = request.POST.get("message")
-        if text:
-            Message.objects.create(chat=chat, sender=request.user.userprofile, text=text)
-            return redirect("chat_detail", chat_id=chat.id)  # Перезагрузка страницы для отображения нового сообщения
+        data = json.loads(request.body)
+        message_text = data.get('text')
+        sender = request.user.userprofile
+        receiver = chat.receiver if chat.sender == sender else chat.sender
+        message = Message.objects.create(chat=chat, sender=sender, receiver=receiver, text=message_text)
+        return JsonResponse({"status": "ok", "message": message.text, "sender": message.sender.user.username, "created_at": message.created_at.strftime("%Y-%m-%d %H:%M:%S")})
 
-    return render(request, 'chat_detail.html', {
-        'chat': chat,
-        'messages': messages,
-        'companion_username': companion_username if companion else "Аноним"
-    })
+    if request.user.userprofile != chat.sender and request.user.userprofile != chat.receiver:
+        return HttpResponseBadRequest("You are not a participant of this chat")
+    messages = Message.objects.filter(chat=chat)
+    return render(request, 'chat_detail.html', {'chat': chat, 'messages': messages})
 
 @login_required
-def send_message(request, chat_id):
-    chat = get_object_or_404(Chat, id=chat_id)
+def chat_with_user(request, user_id):
+    user_profile = request.user.userprofile
+    other_user_profile = get_object_or_404(UserProfile, user_id=user_id)
 
-    if request.method == "POST":
-        text = request.POST.get('text')
-        if text:
-            Message.objects.create(chat=chat, sender=request.user.userprofile, text=text)
+    # Проверяем, существует ли уже чат между этими пользователями
+    chat = Chat.objects.filter(
+        (Q(sender=user_profile) & Q(receiver=other_user_profile)) |
+        (Q(sender=other_user_profile) & Q(receiver=user_profile))
+    ).first()
+
+    if not chat:
+        # Создаем новый чат, если он не существует
+        chat = Chat.objects.create(sender=user_profile, receiver=other_user_profile)
 
     return redirect('chat_detail', chat_id=chat.id)
 
