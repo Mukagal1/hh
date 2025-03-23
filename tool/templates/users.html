@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Пользователи{% endblock %}
+
+{% block content %}
+    <div class="users-page">
+        <h1>Список пользователей</h1>
+        <ul class="user-list">
+            {% for user in users %}
+                <li class="user-item">
+                    <a href="{% url 'user_detail' user.user.username %}">
+                        {{ user.user.username }} - {{ user.role }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <style>
+        .users-page {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .user-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .user-item {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.3s;
+        }
+
+        .user-item a {
+            text-decoration: none;
+            color: #007bff;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .user-item a:hover {
+            text-decoration: underline;
+        }
+
+        .user-item:hover {
+            background: #f8f9fa;
+        }
+    </style>
+{% endblock %}

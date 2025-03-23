@@ -8,46 +8,87 @@
         max-width: 800px;
         margin: 40px auto;
         padding: 20px;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
     
     h1 {
-        font-size: 36px;
+        font-size: 32px;
         font-weight: 700;
         margin-bottom: 20px;
+        color: #333;
     }
     
     p {
-        font-size: 18px;
+        font-size: 16px;
         color: #7f8c8d;
+        margin-bottom: 20px;
     }
 
     .search-container {
         display: flex;
-        align-items: center; /* Выравнивание по центру */
-        gap: 10px; /* Расстояние между элементами */
-        margin: 20px 0; /* Расстояние до и после */
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
     }
     
     .search-bar {
-        flex-grow: 1; /* Поле поиска занимает всю доступную ширину */
+        flex-grow: 1;
         padding: 12px;
         border: 1px solid #ccc;
-        border-radius: 5px;
+        border-radius: 8px;
         font-size: 14px;
     }
 
     .add-new-skill {
-        padding: 8px 12px;
+        padding: 10px 15px;
         border: none;
         background-color: #007bff;
         color: white;
         font-size: 16px;
         cursor: pointer;
-        border-radius: 5px;
+        border-radius: 8px;
+        transition: background-color 0.3s;
+        position: relative;
     }
     
     .add-new-skill:hover {
         background-color: #0056b3;
+    }
+
+    .add-new-skill-form {
+        display: none;
+        position: absolute;
+        top: 40px;
+        right: 0;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 10px;
+        z-index: 10;
+    }
+
+    .add-new-skill-form input {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        margin-right: 5px;
+    }
+
+    .add-new-skill-form button {
+        padding: 8px 12px;
+        border: none;
+        background-color: #28a745;
+        color: white;
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+
+    .add-new-skill-form button:hover {
+        background-color: #218838;
     }
     
     .skills-section {
@@ -58,40 +99,44 @@
         font-size: 22px;
         font-weight: bold;
         margin-bottom: 10px;
+        color: #007bff;
     }
     
     .skills-list {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 15px;
-        max-width: 100%;
-        padding: 10px;
     }
     
     .skill-item {
-        background: white;
+        background: #f1f1f1;
         padding: 15px;
-        border-radius: 10px;
-        border: 2px solid #ddd;
+        border-radius: 8px;
+        border: 1px solid #ddd;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-        font-size: 18px;
+        font-size: 16px;
         font-weight: bold;
         color: #2c3e50;
         text-align: center;
         cursor: pointer;
-        transition: 0.2s;
-        word-wrap: break-word;
+        transition: background-color 0.3s, transform 0.2s;
     }
     
     .skill-item:hover, .skill-item.selected {
-        background: #2980b9;
+        background: #007bff;
         color: white;
-        border-color: #2980b9;
+        border-color: #007bff;
         transform: scale(1.05);
     }
     
     .hidden-skills {
         display: none;
+    }
+
+    .hidden-skills.visible {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
     }
     
     .show-more-btn {
@@ -102,11 +147,11 @@
         color: white;
         background: #3498db;
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
         cursor: pointer;
-        transition: 0.2s;
+        transition: background-color 0.3s;
         display: block;
-        width: auto;
+        width: 100%;
     }
     
     .show-more-btn:hover {
@@ -119,22 +164,21 @@
         font-size: 16px;
         font-weight: bold;
         color: white;
-        background: #2ecc71;
+        background: #28a745;
         border: none;
         border-radius: 8px;
         cursor: pointer;
-        transition: 0.2s;
+        transition: background-color 0.3s;
         display: block;
         width: 100%;
     }
     
     .add-skill-btn:hover {
-        background: #27ae60;
+        background: #218838;
     }
     
-    /* Кнопка добавления скиллов (только для HR/Boss) */
     .add-skill-icon {
-        background: #2ecc71;
+        background: #28a745;
         color: white;
         font-size: 24px;
         padding: 8px 12px;
@@ -147,11 +191,11 @@
         right: 20px;
         top: 10px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        transition: 0.2s;
+        transition: background-color 0.3s;
     }
     
     .add-skill-icon:hover {
-        background: #27ae60;
+        background: #218838;
     }
     
     @media (max-width: 1024px) {
@@ -168,117 +212,168 @@
     
 </style>
 
-    <div class="skills-container">
-        <h1>📚 Скиллы</h1>
-        <p>Здесь отображаются навыки. Найдите подходящий вам навык и добавьте себе в профиль!</p>
-        
-        <!-- Поисковик и кнопка добавления скилла -->
-        <div class="search-container">
-            <input type="text" id="search-skill" class="search-bar" placeholder="🔍 Найти скилл...">
-            {% if userrole in "hr, boss" %}
-                <button class="add-new-skill">➕</button>
-            {% endif %}
-        </div>
-
-        <form id="skills-form" method="POST">
-            {% csrf_token %}
-            
-            {% if userrole not in "hr, boss" %}
-            <h2>Ваши скиллы</h2>
-            <div class="skills-list" id="user-skills">
-                {% for skill in userskills|slice:":5" %}
-                    <div class="skill-item selected" data-skill-id="{{ skill.id }}">{{ skill.name }}</div>
-                {% endfor %}
-                <div id="hidden-user-skills" class="hidden-skills">
-                    {% for skill in userskills|slice:"5:" %}
-                        <div class="skill-item selected" data-skill-id="{{ skill.id }}">{{ skill.name }}</div>
-                    {% endfor %}
-                </div>
+<div class="skills-container">
+    <h1>📚 Скиллы</h1>
+    <p>Здесь отображаются навыки. Найдите подходящий вам навык и добавьте себе в профиль!</p>
+    
+    <div class="search-container">
+        <input type="text" id="search-skill" class="search-bar" placeholder="🔍 Найти скилл...">
+        {% if userrole in "hr, boss" %}
+            <button class="add-new-skill">➕</button>
+            <div class="add-new-skill-form">
+                <input type="text" id="new-skill-name" placeholder="Название скилла">
+                <button type="button" id="add-skill-btn">Добавить</button>
             </div>
-            {% if userskills|length > 5 %}
-                <button id="show-more-user" class="show-more-btn" type="button">Показать ещё</button>
-            {% endif %}
         {% endif %}
-        
-            <h2>Другие скиллы</h2>
-            <div class="skills-list" id="other-skills">
-                {% for skill in otherskills|slice:":9" %}
-                    <div class="skill-item" data-skill-id="{{ skill.id }}">{{ skill.name }}</div>
-                {% endfor %}
-                <div id="hidden-other-skills" class="hidden-skills">
-                    {% for skill in otherskills|slice:"9:" %}
-                        <div class="skill-item" data-skill-id="{{ skill.id }}">{{ skill.name }}</div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% if otherskills|length > 9 %}
-                <button id="show-more-other" class="show-more-btn" type="button">Показать ещё</button>
-            {% endif %}
-
-            <button type="submit" class="add-skill-btn">Добавить выбранные скиллы</button>
-        </form>
     </div>
 
-    <script>
-        let selectedSkills = new Set();
-        let skillsList = document.getElementById('other-skills');
-        let searchInput = document.getElementById('search-skill');
-        let allSkills = Array.from(skillsList.children);
+    <form id="skills-form" method="POST">
+        {% csrf_token %}
+        
+        {% if userrole not in "hr, boss" %}
+        <h2 class="skills-title">Ваши скиллы</h2>
+        <div class="skills-list" id="user-skills">
+            {% for skill in userskills|slice:":5" %}
+                <div class="skill-item selected" data-skill-id="{{ skill.id }}">{{ skill.name }}</div>
+            {% endfor %}
+            <div id="hidden-user-skills" class="hidden-skills">
+                {% for skill in userskills|slice:"5:" %}
+                    <div class="skill-item selected" data-skill-id="{{ skill.id }}">{{ skill.name }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        {% if userskills|length > 5 %}
+            <button id="show-more-user" class="show-more-btn" type="button">Показать ещё</button>
+            <button id="hide-user-skills" class="show-more-btn" type="button" style="display: none;">Скрыть</button>
+        {% endif %}
+    {% endif %}
+    
+        <h2 class="skills-title">Другие скиллы</h2>
+        <div class="skills-list" id="other-skills">
+            {% for skill in otherskills|slice:":9" %}
+                <div class="skill-item" data-skill-id="{{ skill.id }}">{{ skill.name }}</div>
+            {% endfor %}
+            <div id="hidden-other-skills" class="hidden-skills">
+                {% for skill in otherskills|slice:"9:" %}
+                    <div class="skill-item" data-skill-id="{{ skill.id }}">{{ skill.name }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        {% if otherskills|length > 9 %}
+            <button id="show-more-other" class="show-more-btn" type="button">Показать ещё</button>
+            <button id="hide-other-skills" class="show-more-btn" type="button" style="display: none;">Скрыть</button>
+        {% endif %}
 
-        function setupShowMore(buttonId, hiddenDivId) {
-            let button = document.getElementById(buttonId);
-            let hiddenDiv = document.getElementById(hiddenDivId);
-            
-            if (button && hiddenDiv) {
-                button.addEventListener('click', function () {
-                    hiddenDiv.classList.toggle('hidden-skills');
-                    button.style.display = 'none';
-                });
-            }
+        <button type="submit" class="add-skill-btn">Добавить выбранные скиллы</button>
+    </form>
+</div>
+
+<script>
+    let selectedSkills = new Set();
+    let skillsList = document.getElementById('other-skills');
+    let searchInput = document.getElementById('search-skill');
+    let allSkills = Array.from(skillsList.children);
+
+    function setupShowMore(buttonId, hiddenDivId, hideButtonId) {
+        let button = document.getElementById(buttonId);
+        let hiddenDiv = document.getElementById(hiddenDivId);
+        let hideButton = document.getElementById(hideButtonId);
+
+        if (button && hiddenDiv && hideButton) {
+            button.addEventListener('click', function () {
+                hiddenDiv.classList.add('visible');
+                button.style.display = 'none';
+                hideButton.style.display = 'block';
+            });
+
+            hideButton.addEventListener('click', function () {
+                hiddenDiv.classList.remove('visible');
+                button.style.display = 'block';
+                hideButton.style.display = 'none';
+            });
         }
+    }
 
-        setupShowMore('show-more-user', 'hidden-user-skills');
-        setupShowMore('show-more-other', 'hidden-other-skills');
+    setupShowMore('show-more-user', 'hidden-user-skills', 'hide-user-skills');
+    setupShowMore('show-more-other', 'hidden-other-skills', 'hide-other-skills');
 
-        // Фильтрация скиллов
-        searchInput.addEventListener('input', function () {
-            let filter = this.value.toLowerCase();
-            document.querySelectorAll('.skill-item').forEach(skill => {
-                skill.style.display = skill.textContent.toLowerCase().includes(filter) ? 'inline-block' : 'none';
-            });
-        });
-
-        // Выбор скиллов
+    searchInput.addEventListener('input', function () {
+        let filter = this.value.toLowerCase();
         document.querySelectorAll('.skill-item').forEach(skill => {
-            skill.addEventListener('click', function () {
-                let skillId = this.dataset.skillId;
-                if (selectedSkills.has(skillId)) {
-                    selectedSkills.delete(skillId);
-                    this.classList.remove('selected');
-                } else {
-                    selectedSkills.add(skillId);
-                    this.classList.add('selected');
-                }
-                searchInput.value = "";
-            });
+            skill.style.display = skill.textContent.toLowerCase().includes(filter) ? 'inline-block' : 'none';
         });
+    });
 
-        // Отправка формы
-        document.getElementById('skills-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-            let formData = new FormData();
-            selectedSkills.forEach(id => formData.append('skills[]', id));
+    document.querySelectorAll('.skill-item').forEach(skill => {
+        skill.addEventListener('click', function () {
+            let skillId = this.dataset.skillId;
+            if (selectedSkills.has(skillId)) {
+                selectedSkills.delete(skillId);
+                this.classList.remove('selected');
+            } else {
+                selectedSkills.add(skillId);
+                this.classList.add('selected');
+            }
+            searchInput.value = "";
+        });
+    });
 
-            fetch('', {
+    document.querySelector('.add-new-skill').addEventListener('click', function () {
+        document.querySelector('.add-new-skill-form').style.display = 'block';
+    });
+
+    document.getElementById('add-skill-btn').addEventListener('click', function () {
+        let skillName = document.getElementById('new-skill-name').value.trim();
+        if (skillName) {
+            fetch('/skills/add/', {
                 method: 'POST',
-                body: formData,
-                headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value}
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({ skill: skillName })
             }).then(response => response.json()).then(data => {
                 if (data.message) {
                     alert(data.message);
-                    location.reload();
+                } else {
+                    let newSkill = document.createElement('div');
+                    newSkill.className = 'skill-item';
+                    newSkill.dataset.skillId = data.id;
+                    newSkill.textContent = skillName;
+                    document.getElementById('other-skills').appendChild(newSkill);
+                    document.querySelector('.add-new-skill-form').style.display = 'none';
+                    document.getElementById('new-skill-name').value = '';
+                    newSkill.addEventListener('click', function () {
+                        let skillId = this.dataset.skillId;
+                        if (selectedSkills.has(skillId)) {
+                            selectedSkills.delete(skillId);
+                            this.classList.remove('selected');
+                        } else {
+                            selectedSkills.add(skillId);
+                            this.classList.add('selected');
+                        }
+                        searchInput.value = "";
+                    });
                 }
             });
+        }
+    });
+
+    document.getElementById('skills-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        let formData = new FormData();
+        selectedSkills.forEach(id => formData.append('skills[]', id));
+
+        fetch('', {
+            method: 'POST',
+            body: formData,
+            headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value}
+        }).then(response => response.json()).then(data => {
+            if (data.message) {
+                alert(data.message);
+                location.reload();
+            }
         });
-    </script>
+    });
+</script>
 {% endblock %}

@@ -91,7 +91,11 @@
             <a href="/chats">Чаты</a>
             <a href="/skills">Скиллы</a>
             <a href="/tests">Тесты</a>
-            <a href="/profile/{{ user.username }}/">Профиль</a>
+            <a href="/profile/{{ user.username }}">Профиль</a>
+            {% if user.is_authenticated and user.userprofile.role == 'hr' %}
+                <a href="/profiles" class="{% if '/profiles/' in request.path %}active{% endif %}">Пользователи</a>
+                <a href="/search_candidates" class="{% if '/search_candidates/' in request.path %}active{% endif %}">Поиск кандидатов</a>
+            {% endif %}
         </div>
         <a href="/signout">Выход</a>
     </div>

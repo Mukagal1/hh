@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from .models import Skill, UserProfile, Test, Chat, Message
 from django.db.models import Q
+from .utils import compute_similarity
 
 def index(request):
     return redirect('login_view')
@@ -22,6 +23,7 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
+            print(user.userprofile.role)
             return JsonResponse({'status': 'ok', 'user': username,
                                  'role': user.userprofile.role})
         else:
@@ -129,3 +131,48 @@ def search_user(request):
         if user:
             return JsonResponse({"user_id": user.id, "username": user.username})
     return JsonResponse({})
+
+@login_required
+def profiles(request):
+    users = UserProfile.objects.exclude(user=request.user)
+    return render(request, 'users.html', {'users': users})
+
+@login_required
+def user_detail(request, username):
+    user = get_object_or_404(User, username=username)
+    return render(request, 'user_detail.html', {'user': user})
+
+@login_required
+def set_resume(request):
+    if request.method == "POST":
+        resume = request.POST.get("resume")
+        user_profile = request.user.userprofile
+        user_profile.resume = resume
+        user_profile.save()
+        return redirect('profile', username=request.user.username)
+    return redirect('profile', username=request.user.username)
+
+@login_required
+def search_candidates(request):
+    users = []
+    if request.method == "POST":
+        search_text = request.POST.get("search_text", "").strip()
+        if search_text:
+            users = UserProfile.objects.exclude(user=request.user)
+            ranked_users = sorted(
+                users, key=lambda user: compute_similarity(user.resume, search_text), reverse=True
+            )
+            users = ranked_users
+
+    return render(request, 'search_candidates.html', {'users': users})
+
+@login_required
+def add_skill(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        skill_name = data.get("skill")
+        skill, created = Skill.objects.get_or_create(name=skill_name)
+        if created:
+            return JsonResponse({"id": skill.id})
+        else:
+            return JsonResponse({"message": "Скилл уже существует!"})

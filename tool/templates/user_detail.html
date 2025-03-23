@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Профиль пользователя{% endblock %}
+
+{% block content %}
+    <div class="user-detail-page">
+        <button onclick="history.back()" class="back-button">&#8592; Назад</button>
+        <h1>Профиль пользователя: {{ user.username }}</h1>
+        <div class="user-info">
+            <p><strong>Имя пользователя:</strong> {{ user.username }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Роль:</strong> {{ user.userprofile.role }}</p>
+            <p><strong>Резюме:</strong> {{ user.userprofile.resume }}</p>
+        </div>
+        <a href="{% url 'chat_with_user' user_id=user.id %}" class="chat-link">Начать чат</a>
+    </div>
+
+    <style>
+        .user-detail-page {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .user-info p {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        .chat-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .chat-link:hover {
+            background-color: #0056b3;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: #5a6268;
+        }
+    </style>
+{% endblock %}

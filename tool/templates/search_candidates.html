@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Поиск кандидатов{% endblock %}
+
+{% block content %}
+    <div class="search-candidates-page">
+        <h1>Поиск кандидатов</h1>
+        <form id="searchForm" method="post" action="{% url 'search_candidates' %}">
+            {% csrf_token %}
+            <textarea name="search_text" id="searchText" rows="5" cols="50" placeholder="Введите текст для поиска..."></textarea>
+            <br>
+            <button type="submit">Найти кандидатов</button>
+        </form>
+        <div id="resultsContainer" class="results-container">
+            {% if users %}
+                <h2>Результаты поиска</h2>
+                <ul class="results-list">
+                    {% for user in users %}
+                        <li class="result-item">
+                            <a href="{% url 'user_detail' username=user.user.username %}">
+                                {{ user.user.username }} - {{ user.role }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+
+    <style>
+        .search-candidates-page {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .results-container {
+            margin-top: 20px;
+        }
+
+        .results-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .result-item {
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .result-item a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .result-item a:hover {
+            text-decoration: underline;
+        }
+    </style>
+{% endblock %}
